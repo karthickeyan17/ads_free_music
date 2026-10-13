@@ -8,21 +8,22 @@ MPV_CONF="$HOME/.config/mpv/mpv.conf"
 rm -f "$BIN_DIR/music" "$BIN_DIR/music.py"
 rm -rf "$APP_DIR"
 
-# Remove only the [music] profile and its settings.
+# Remove only the profile block created by this installer.
 if [[ -f "$MPV_CONF" ]] &&
-   grep -q '^\[music\][[:space:]]*$' "$MPV_CONF"; then
+   grep -q '^# BEGIN ads-free-music profile$' "$MPV_CONF"; then
 
     tmp_file="$(mktemp "${MPV_CONF}.XXXXXX")"
     trap 'rm -f "$tmp_file"' EXIT
 
     awk '
-        /^\[music\][[:space:]]*$/ {
+        /^# BEGIN ads-free-music profile$/ {
             skip = 1
             next
         }
 
-        /^\[/ {
+        /^# END ads-free-music profile$/ {
             skip = 0
+            next
         }
 
         !skip {
@@ -34,7 +35,7 @@ if [[ -f "$MPV_CONF" ]] &&
     rm -f "$tmp_file"
     trap - EXIT
 
-    printf 'Removed MPV music profile.\n'
+    printf 'Removed Ads-Free Music MPV profile.\n'
 fi
 
 printf 'Music player uninstalled.\n'

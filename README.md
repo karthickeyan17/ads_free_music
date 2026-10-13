@@ -1,63 +1,93 @@
 # Ads-Free Music
 
-A lightweight terminal-based music player for Linux, powered by Python, MPV, FZF, yt-dlp, and YouTube Music.
+A lightweight terminal-based music player for Linux and Android (Termux), powered by Python, MPV, FZF, yt-dlp, and YouTube Music.
 
 ## Features
 
-- Search and play music from YouTube Music.
+- Search and play music through your music player interface.
 - Lightweight terminal interface using FZF.
 - MPV-powered audio playback.
 - Python dependencies isolated in a virtual environment.
-- Automatic installation of required Python packages.
-- Dedicated MPV profile for music playback.
+- Automatic installation and updating of Python dependencies.
+- Dedicated MPV profile for audio playback.
 - User-local installation without root privileges.
-- Works with Fish, Bash, and other shells.
+- Supports Arch Linux, Debian, Ubuntu, and Termux.
 
 ## Requirements
 
-Install these system dependencies before running the installer:
+The following system packages must be installed:
 
-- Python 3 with virtual environment support
+- Python 3
 - MPV
 - FZF
 - Git
 
-### Arch Linux
-
-```bash
-sudo pacman -S --needed python mpv fzf git
-```
-
 ## Installation
 
-Clone the repository:
+### Arch Linux
+
+Install the required packages:
+
+```bash
+sudo pacman -S --needed git python mpv fzf
+```
+
+Clone the repository and run the installer:
 
 ```bash
 git clone YOUR_GIT_REPOSITORY_URL
 cd ads_free_music
-```
-
-Run the installer:
-
-```bash
-chmod +x install.sh
+chmod +x install.sh uninstall.sh
 ./install.sh
 ```
 
-The installer will:
+### Debian / Ubuntu / antiX
 
-1. Check whether Python, MPV, and FZF are available.
-2. Create a virtual environment at `~/.local/share/music`.
-3. Install `yt-dlp[default]` and `ytmusicapi` in that environment.
-4. Copy `music.py` to `~/.local/bin/music.py`.
-5. Create the `music` launcher in `~/.local/bin`.
-6. Add the dedicated `[music]` profile to `~/.config/mpv/mpv.conf` if it doesn't already exist.
+Update package lists and install the dependencies:
 
-No root privileges are required, provided the system dependencies are installed.
+```bash
+sudo apt update
+sudo apt install git python3 python3-venv python3-pip mpv fzf
+```
+
+Clone the repository and install:
+
+```bash
+git clone YOUR_GIT_REPOSITORY_URL
+cd ads_free_music
+chmod +x install.sh uninstall.sh
+./install.sh
+```
+
+If your distribution uses a separate package for Python virtual environments, make sure it is installed. Debian-based systems may require `python3-venv`.
+
+### Termux (Android)
+
+Install Termux packages:
+
+```bash
+pkg update
+pkg install git python mpv fzf
+```
+
+Clone the repository and run the installer:
+
+```bash
+git clone YOUR_GIT_REPOSITORY_URL
+cd ads_free_music
+chmod +x install.sh uninstall.sh
+./install.sh
+```
+
+No root access is required.
+
+**Termux note:** MPV audio playback depends on your Termux environment and Android audio configuration. Python packages and YouTube playback should be tested on your device.
 
 ## PATH Configuration
 
-If the installer reports that `~/.local/bin` is not in your PATH, configure your shell.
+The installed command is located at `~/.local/bin/music`.
+
+If the installer warns that `~/.local/bin` is missing from your PATH, configure your shell.
 
 ### Fish
 
@@ -67,27 +97,47 @@ fish_add_path "$HOME/.local/bin"
 
 ### Bash
 
-Add this line to `~/.bashrc`:
-
 ```bash
-export PATH="$HOME/.local/bin:$PATH"
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
 ```
 
-Restart your terminal or reload your shell configuration.
+For Zsh, add the same `export PATH` line to `~/.zshrc`.
 
 ## Usage
 
-Start the music player:
+Start the player:
 
 ```bash
 music
 ```
 
-The application uses FZF for its terminal interface and MPV for audio playback.
+The player uses FZF for its terminal interface and MPV for audio playback.
+
+## Python Environment
+
+The installer creates a dedicated virtual environment at:
+
+```text
+~/.local/share/music/
+```
+
+It installs these Python packages inside that environment:
+
+- `yt-dlp[default]`
+- `ytmusicapi`
+
+This keeps the application's Python dependencies separate from system-managed Python packages.
 
 ## MPV Configuration
 
-The installer adds the following profile to `~/.config/mpv/mpv.conf`:
+The installer adds a dedicated `[music]` profile to:
+
+```text
+~/.config/mpv/mpv.conf
+```
+
+The profile is:
 
 ```ini
 [music]
@@ -102,49 +152,84 @@ demuxer-readahead-secs=5
 volume=60
 ```
 
-These settings configure MPV for audio-focused playback with caching and a default volume of 60.
+The profile configures audio-focused playback, caching, and a default volume of 60.
 
-For this profile to take effect, the application must launch MPV with `--profile=music`.
+For the profile to apply, the application must launch MPV with `--profile=music`.
 
-Existing MPV settings are preserved. The installer does not append the profile again if a `[music]` section already exists.
+Existing MPV configuration is preserved. The installer adds the profile only when a `[music]` section is not already present.
 
 ## Update
 
-To update the player, enter the cloned repository and run:
+Enter the cloned repository and run:
 
 ```bash
 git pull
 ./install.sh
 ```
 
-The installer refreshes the application script and updates the Python dependencies in the virtual environment.
+This updates the application script and upgrades the Python dependencies in the virtual environment.
 
 ## Uninstall
 
-Run the uninstall script from the repository:
+From the cloned repository, run:
 
 ```bash
 ./uninstall.sh
 ```
 
-This removes the installed launcher, Python script, and virtual environment.
+The uninstaller removes the installed launcher, application script, virtual environment, and the MPV profile created by the installer.
 
-**Note:** If you use the original uninstall script, it does not remove the `[music]` profile from your MPV configuration. You can remove that section manually if you no longer need it.
+Other MPV settings are preserved.
 
 ## Installation Locations
 
 | Path | Purpose |
 |---|---|
 | `~/.local/share/music/` | Python virtual environment |
-| `~/.local/bin/music` | Command-line launcher |
-| `~/.local/bin/music.py` | Music player application |
+| `~/.local/bin/music` | Launcher command |
+| `~/.local/bin/music.py` | Application script |
 | `~/.config/mpv/mpv.conf` | MPV configuration |
 
-All installation paths use `$HOME`, so the installer does not depend on a specific Linux username.
+All paths are relative to the current user's home directory.
+
+## Troubleshooting
+
+### Command not found
+
+Ensure `~/.local/bin` is in your PATH, then restart your terminal.
+
+### Missing dependencies
+
+Install Python, MPV, and FZF using your distribution's package manager. The installer checks for these commands but does not install system packages automatically.
+
+### Python package installation fails
+
+Verify that Python, pip, and virtual environment support are working:
+
+```bash
+python -m venv --help
+python -m pip --version
+```
+
+On Debian-based distributions, the `python3-venv` package may be required.
+
+### MPV profile does not apply
+
+Verify that your application starts MPV with:
+
+```bash
+mpv --profile=music
+```
+
+The actual playback command should also pass the appropriate media URL or input arguments.
+
+### YouTube playback fails
+
+Update the application dependencies by running the installer again. YouTube may change its playback requirements, and network restrictions or platform-specific compatibility issues can affect playback.
 
 ## Technologies
 
-- Python
+- [Python](https://www.python.org/)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 - [ytmusicapi](https://github.com/sigma67/ytmusicapi)
 - [MPV](https://mpv.io/)
@@ -152,5 +237,5 @@ All installation paths use `$HOME`, so the installer does not depend on a specif
 
 ## License
 
-Choose a license for your project before distributing it publicly. If you want others to use, modify, and redistribute your code, consider the MIT License.
+Add a `LICENSE` file to the repository before distributing the project. The MIT License is one option if you want to permit reuse, modification, and redistribution under its terms.
 
